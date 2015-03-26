@@ -10,8 +10,12 @@ class GeneralTest(unittest.TestCase):
         self.source = os.path.join(self.files, 'source')
         self.dest = os.path.join(self.files, 'dest')
         self.logs = os.path.join(self.files, 'logs')
+        self.parallel_rsyncs_messy = os.path.join(self.current_dir,
+                                                  "../parallel_rsyncs.sh")
+        self.parallel_rsyncs = os.path.abspath(self.parallel_rsyncs_messy)
 
         shutil.copytree(os.path.join(self.files, 'data'), self.source)
+
 
 
     def tearDown(self):
