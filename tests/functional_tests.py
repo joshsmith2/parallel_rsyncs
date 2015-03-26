@@ -2,7 +2,7 @@ from base import *
 
 class FunctionalTest(GeneralTest):
 
-    def test_goes_here(self):
+    def test_move_works_as_expected(self):
         self.assertTrue(True)
 
 if __name__ == '__main__':
