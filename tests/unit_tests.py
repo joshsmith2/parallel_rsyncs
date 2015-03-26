@@ -1,5 +1,4 @@
 from base import *
-import main
 
 class UnitTest(GeneralTest):
 
