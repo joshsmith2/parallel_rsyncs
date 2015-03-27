@@ -96,7 +96,8 @@ check_dest() {
             echo "Destination does not exist. Creating ${dest}"
             mkdir -vp -m 777 ${dest}
         else
-            echo "Destination does not exist. Run with -c flag if you'd like to create it."
+            echo "Destination ${dest} does not exist. Run with -c flag if you'd like to create it."
+            exit 1
         fi
     fi
 }
