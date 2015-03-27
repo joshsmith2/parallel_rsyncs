@@ -12,8 +12,11 @@
 # NICE BUT NOT STRICTLY NECESSARY:
 # - Ability to specify a file containing paths to move
 
+
+
 #Initialise command line arguments
-while getopts "hs:d:l:p:vm" opt; do
+# Defaults for switches:
+while getopts "hs:d:l:p:cvm" opt; do
     case $opt in
         s)
             #source: str, path - the source directory to copy
@@ -30,10 +33,13 @@ while getopts "hs:d:l:p:vm" opt; do
         p)
             no_of_parallel_syncs=$OPTARG
             ;;
+        c)
+            create_dest=true
+            ;;
         v)
             verbose=true
             ;;
-        c)
+        m)
             move_mode=true
             ;;
         h)
@@ -61,15 +67,19 @@ while getopts "hs:d:l:p:vm" opt; do
              -l=logs: str - path
                 A directory in which to create logs for this move
 
-             -p=parralel_rsyncs: int.
+             -p=parallel_rsyncs: int.
                 The number of rsync instances to run in parallel when moving these files.
                 Default: 20
 
-             -m move_mode: bool
-                Delete files from source after copy.
+             -c : bool : default false
+                If true, create destination directory (and any necessary
+                intermediates) if it does not exist.
 
              -v : bool
                 Verbose - if true, print info to stdout as opposed to only errors.
+
+             -m move_mode: bool
+                Delete files from source after copy.
 
              -h : bool
                 Help - Print this help and exit.
@@ -78,3 +88,18 @@ while getopts "hs:d:l:p:vm" opt; do
              ;;
     esac
 done
+
+# Check that the destination directory exists - create it if not
+check_dest() {
+    if [[ ! -e ${dest} ]]; then
+        if [[ $create_dest ]]; then
+            echo "Destination does not exist. Creating ${dest}"
+            mkdir -vp -m 777 ${dest}
+        else
+            echo "Destination does not exist. Run with -c flag if you'd like to create it."
+        fi
+    fi
+}
+
+check_dest
+
