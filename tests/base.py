@@ -16,6 +16,12 @@ class GeneralTest(unittest.TestCase):
                                              "../parallel_rsyncs.sh")
         self.parallel_rsyncs = os.path.abspath(parallel_rsyncs_messy)
 
+        self.minimal_transfer = [self.parallel_rsyncs,
+                                 '-s', self.source,
+                                 '-d', self.dest,
+                                 '-l', self.logs,]
+
+
         shutil.copytree(os.path.join(self.files, 'data'), self.source)
 
 
@@ -28,6 +34,7 @@ class GeneralTest(unittest.TestCase):
     def check_exists(self, path):
         self.assertTrue(os.path.exists(os.path.abspath(path)),
                         msg=path + " does not exist.")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,7 +16,7 @@
 
 #Initialise command line arguments
 # Defaults for switches:
-while getopts "hs:d:l:p:cvm" opt; do
+while getopts "hs:d:l:p:b:cvm" opt; do
     case $opt in
         s)
             #source: str, path - the source directory to copy
@@ -33,6 +33,9 @@ while getopts "hs:d:l:p:cvm" opt; do
         p)
             no_of_parallel_syncs=$OPTARG
             ;;
+        b)
+            alternative_rsync_binary=$OPTARG
+            ;;
         c)
             create_dest=true
             ;;
@@ -42,50 +45,60 @@ while getopts "hs:d:l:p:cvm" opt; do
         m)
             move_mode=true
             ;;
+        x)
+            copy_extended_attributes=true
+            ;;
         h)
 
-             echo """
-             Sync files from source to dir using multiple instances of rsync.
+            echo """
+            Sync files from source to dir using multiple instances of rsync.
 
-             The original version of this script was developed by Stephen Buckley in Late July
-             and early August 2013, and has since been developed by Josh
-             Smith into the form you have before you today.
+            The original version of this script was developed by Stephen Buckley in Late July
+            and early August 2013, and has since been developed by Josh
+            Smith into the form you have before you today.
 
-             It was written in response to torrents of water flooding through
-             the ceiling of one of our machine rooms, and the subsequent
-             discovery of the poor condition of the fileservers' disk directories.
+            It was written in response to torrents of water flooding through
+            the ceiling of one of our machine rooms, and the subsequent
+            discovery of the poor condition of the fileservers' disk directories.
 
-             Hopefully it can help you copy lots of data elsewhere at speed too.
+            Hopefully it can help you copy lots of data elsewhere at speed too.
 
 
-             -s=source : str - path
+            -s = source : str - path
                 The source directory to copy.
 
-             -d=dest : str - path
+            -d = dest : str - path
                 The destibnation directory
 
-             -l=logs: str - path
+            -l = logs: str - path
                 A directory in which to create logs for this move
 
-             -p=parallel_rsyncs: int.
+            -p = parallel_rsyncs : int
                 The number of rsync instances to run in parallel when moving these files.
                 Default: 20
 
-             -c : bool : default false
+            -b = alternative_rsync_binary : str - path
+                Full path to an alternative rsync binary to use for the
+                transfer. Otherwise, use the system default.
+
+            -c : create_dest : bool : default false
                 If true, create destination directory (and any necessary
                 intermediates) if it does not exist.
 
-             -v : bool
+            -v : bool : default false
                 Verbose - if true, print info to stdout as opposed to only errors.
 
-             -m move_mode: bool
-                Delete files from source after copy.
+            -m : move_mode : bool : default false
+                Delete files from source after copy. Off by default.
 
-             -h : bool
+            -x : copy_extended_attributes : bool : default false
+                Copy extended attributes.
+
+            -h : bool
                 Help - Print this help and exit.
-                                                                                                                                                           for Gruffyydd"""
-             exit 0
-             ;;
+                                                                                                                                                          for Gruffyydd"""
+            exit 0
+            ;;
     esac
 done
 
@@ -102,5 +115,13 @@ check_dest() {
     fi
 }
 
+get_rsync_version() {
+    RsyncVers=` "$RsyncApp" --version | grep version |awk '{print $3}' |cut -d '.' -f 1 `
+    echo $RsyncVers
+}
+
+# MAIN
 check_dest
+
+
 

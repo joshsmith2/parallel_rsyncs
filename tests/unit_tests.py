@@ -1,7 +1,7 @@
 from base import *
 
 
-class UnitTest(GeneralTest):
+class FileTest(GeneralTest):
 
     def test_creates_dest_if_not_already_extant(self):
         self.assertFalse(os.path.exists(self.non_existent_dest))
@@ -27,6 +27,18 @@ class UnitTest(GeneralTest):
             self.assertIn(message, output)
         self.assertFalse(os.path.exists(self.non_existent_dest))
 
+class RsyncSyntaxTest(GeneralTest):
+
+    def test_correct_version_of_rsync_used(self):
+        default_output = str(sp.check_output(self.minimal_transfer))
+        default_path = '/opt/local/bin/rsync' # CAREFUL - PLATFORM DEPENDANT
+        self.assertIn(default_path, default_output)
+
+        alternative_path = '/usr/bin/rsync'
+        alternative_transfer = self.minimal_transfer
+        alternative_transfer.extend(['-b', '/usr/bin/rsync'])
+        alternative_output = str(sp.check_output(alternative_transfer))
+        self.assertIn(alternative_path, alternative_output)
 
 
 if __name__ == '__main__':
