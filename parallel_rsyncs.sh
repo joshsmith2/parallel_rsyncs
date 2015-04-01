@@ -31,7 +31,7 @@ while getopts "hs:d:l:p:b:cvm" opt; do
             log_path=$OPTARG
             ;;
         p)
-            no_of_parallel_syncs=$OPTARG
+            parallel_syncs=$OPTARG
             ;;
         b)
             alternative_rsync_binary=$OPTARG
@@ -102,6 +102,18 @@ while getopts "hs:d:l:p:b:cvm" opt; do
     esac
 done
 
+set_up_default_arguments() {
+    if [[ ${alternative_rsync_binary} ]]; then
+        rsync_app=${alternative_rsync_binary}
+    else
+        rsync_app=`which rsync`
+    fi
+
+    if [[ ! $parallel_rsyncs ]]; then
+        parallel_rsyncs=20
+    fi
+}
+
 # Check that the destination directory exists - create it if not
 check_dest() {
     if [[ ! -e ${dest} ]]; then
@@ -115,13 +127,25 @@ check_dest() {
     fi
 }
 
+check_source() {
+    if [[ ! ${source} ]]; then
+        echo "Please specify a source with the '-s' flag."
+        exit 1
+    else
+        if [[ ! -e ${source} ]]; then
+            echo "Source ${source} does not exist. Nothing to do."
+            exit 1
+        fi
+    fi
+}
 get_rsync_version() {
-    RsyncVers=` "$RsyncApp" --version | grep version |awk '{print $3}' |cut -d '.' -f 1 `
-    echo $RsyncVers
+    rsync_version=` ${rsync_app} --version | grep version |awk '{print $3}' |cut -d '.' -f 1 `
+    echo $rsync_version
 }
 
 # MAIN
+check_source
 check_dest
-
+get_rsync_version
 
 

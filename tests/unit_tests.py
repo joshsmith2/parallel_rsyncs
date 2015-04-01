@@ -17,15 +17,44 @@ class FileTest(GeneralTest):
 
     def test_exits_if_dest_not_extant_and_no_c_flag(self):
         self.assertFalse(os.path.exists(self.non_existent_dest))
-        with self.assertRaises(sp.CalledProcessError):
+        try:
             output = str(sp.check_output([self.parallel_rsyncs,
                                           '-s', self.source,
                                           '-d', self.non_existent_dest,
                                           '-l', self.logs]))
+            self.fail("Script did not exit.")
+        except sp.CalledProcessError as e:
             message = "Destination " + self.non_existent_dest + " does not exist." \
-                      "Run with -c flag if you'd like to create it."
-            self.assertIn(message, output)
+                      " Run with -c flag if you'd like to create it."
+            self.assertIn(message, str(e.output))
         self.assertFalse(os.path.exists(self.non_existent_dest))
+
+class ArgumentTest(GeneralTest):
+
+    def test_script_fails_with_nonexistent_source(self):
+        nonexistant_source = '/tmp/bum/bah/jubble/lop/lop/lop.lop'
+        self.assertFalse(os.path.exists(nonexistant_source))
+        try:
+            output = str(sp.check_output([self.parallel_rsyncs,
+                                          '-s', nonexistant_source,
+                                          '-d', self.dest,
+                                          '-l', self.logs]))
+            self.fail("Script did not exit on a nonexistant source")
+        except sp.CalledProcessError as e:
+            message = "Source " + nonexistant_source + " does not exist." \
+            " Nothing to do."
+            self.assertIn(message, str(e.output))
+
+    def test_script_fails_with_source_not_specified(self):
+        try:
+            output = str(sp.check_output([self.parallel_rsyncs,
+                                          '-d', self.dest,
+                                          '-l', self.logs]))
+            self.fail("Script did not exit on unspecified source")
+        except sp.CalledProcessError as e:
+            message = "Please specify a source with the '-s' flag."
+            self.assertIn(message, str(e.output))
+
 
 class RsyncSyntaxTest(GeneralTest):
 
