@@ -69,6 +69,8 @@ class RsyncSyntaxTest(GeneralTest):
         alternative_output = str(sp.check_output(alternative_transfer))
         self.assertIn(alternative_path, alternative_output)
 
+        version_message = "You are using rsync version 2"
+        self.assertIn(version_message, alternative_output)
 
 if __name__ == '__main__':
      unittest.main()

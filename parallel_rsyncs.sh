@@ -138,14 +138,27 @@ check_source() {
         fi
     fi
 }
-get_rsync_version() {
-    rsync_version=` ${rsync_app} --version | grep version |awk '{print $3}' |cut -d '.' -f 1 `
-    echo $rsync_version
+
+construct_argument() {
+    command_to_be_run=${rsync_binary}
 }
+
+get_rsync_version() {
+    if [[ ${alternative_rsync_binary} ]]; then
+        rsync_binary=${alternative_rsync_binary}
+    else
+        rsync_binary=$(which rsync)
+    fi
+    rsync_version=$(${rsync_binary} --version | grep version | awk '{print $3}' | cut -d '.' -f 1)
+}
+
 
 # MAIN
 check_source
 check_dest
 get_rsync_version
+construct_argument
 
+echo "You are using rsync version $rsync_version"
+echo "Command to be run: ${command_to_be_run}"
 
