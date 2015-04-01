@@ -16,7 +16,7 @@
 
 #Initialise command line arguments
 # Defaults for switches:
-while getopts "hs:d:l:p:b:cvm" opt; do
+while getopts "hs:d:l:p:b:cvmx" opt; do
     case $opt in
         s)
             #source: str, path - the source directory to copy
@@ -140,7 +140,17 @@ check_source() {
 }
 
 construct_argument() {
-    command_to_be_run=${rsync_binary}
+    if [[ $move_mode ]]; then
+        copy_or_move_command="--remove-source-files "
+    fi
+    if [[ ${copy_extended_attributes} ]]; then
+        if [[ "$rsync_version" -eq "2" ]]; then
+            extended_attribute_flag="E"
+        elif [[ "$rsync_version" -eq "3" ]]; then
+            extended_attribute_flag="X"
+        fi
+    fi
+    command_to_be_run="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command"
 }
 
 get_rsync_version() {

@@ -60,17 +60,38 @@ class RsyncSyntaxTest(GeneralTest):
 
     def test_correct_version_of_rsync_used(self):
         default_output = str(sp.check_output(self.minimal_transfer))
-        default_path = '/opt/local/bin/rsync' # CAREFUL - PLATFORM DEPENDANT
-        self.assertIn(default_path, default_output)
+        self.assertIn(self.system_binary, default_output)
 
-        alternative_path = '/usr/bin/rsync'
         alternative_transfer = self.minimal_transfer
         alternative_transfer.extend(['-b', '/usr/bin/rsync'])
         alternative_output = str(sp.check_output(alternative_transfer))
-        self.assertIn(alternative_path, alternative_output)
+        self.assertIn(self.v2_binary, alternative_output)
 
         version_message = "You are using rsync version 2"
         self.assertIn(version_message, alternative_output)
+
+    def test_correct_extended_attribute_flag_passed(self):
+        v3_flag = "-WrltDX"
+        v2_flag = "-WrltDE"
+        default_flag = '-WrltD'
+
+        # No ex attrs
+        default_output = str(sp.check_output(self.minimal_transfer))
+        for flag in [v3_flag, v2_flag]:
+            self.assertNotIn(flag, default_output)
+        self.assertIn(default_flag, default_output)
+
+        #v3
+        v3_transfer = self.minimal_transfer
+        v3_transfer.append('-x')
+        v3_output = str(sp.check_output(v3_transfer))
+        self.assertIn(v3_flag, v3_output)
+
+        #v2
+        v2_transfer = self.minimal_transfer
+        v2_transfer.extend(['-b', self.v2_binary, '-x'])
+        v2_output = str(sp.check_output(v2_transfer))
+        self.assertIn(v2_flag, v2_output)
 
 if __name__ == '__main__':
      unittest.main()

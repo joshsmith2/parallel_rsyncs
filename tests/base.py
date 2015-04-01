@@ -23,7 +23,8 @@ class GeneralTest(unittest.TestCase):
 
 
         shutil.copytree(os.path.join(self.files, 'data'), self.source)
-
+        self.system_binary = '/opt/local/bin/rsync'
+        self.v2_binary = '/usr/bin/rsync'
 
 
     def tearDown(self):
