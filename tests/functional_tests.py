@@ -24,7 +24,7 @@ class FunctionalTest(GeneralTest):
 
             with open(dest_content, 'r') as content:
                 lines = [l.strip() for l in content.readlines()]
-            self.assertIn('CONTENT IS IN HERE', lines)
+            self.assertIn('CONTENT IS HERE', lines)
 
 
 if __name__ == '__main__':

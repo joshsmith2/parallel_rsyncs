@@ -163,7 +163,7 @@ get_rsync_version() {
 }
 
 run_parallel_arguments() {
-    ls ${source} | parallel echo "${rsync_with_options} ${source}/{} ${dest} --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log"
+    ls ${source} | parallel ${rsync_with_options} ${source}/{} ${dest} --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log
 }
 # MAIN
 check_source
