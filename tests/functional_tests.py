@@ -8,14 +8,14 @@ class FunctionalTest(GeneralTest):
         self.assertNotEqual(output, b'')
         self.assertIn("Hopefully it can help you", str(output))
 
-    def test_files_get_there_safely_with_logs(self):
+    def test_files_get_there_safely(self):
         sp.check_call([self.parallel_rsyncs,
                        '-s', self.source,
                        '-d', self.dest,
                        '-l', self.logs])
         for i in range(10):
-            dest_root = os.path.join(self.dest, 'root' + str(i+1))
-            dest_child = os.path.join(dest_root, 'child' + str(i+1))
+            dest_root = os.path.join(self.dest, 'root ' + str(i+1))
+            dest_child = os.path.join(dest_root, 'child ' + str(i+1))
             dest_content = os.path.join(dest_child, 'content.txt')
 
             self.check_exists(dest_root)

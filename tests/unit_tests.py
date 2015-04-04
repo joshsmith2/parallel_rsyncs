@@ -93,5 +93,11 @@ class RsyncSyntaxTest(GeneralTest):
         v2_output = str(sp.check_output(v2_transfer))
         self.assertIn(v2_flag, v2_output)
 
+    def test_move_mode_flag_passed(self):
+        move_transfer = self.minimal_transfer
+        move_transfer.append('-m')
+        output = str(sp.check_output(move_transfer))
+        self.assertIn('--remove-source-files', output)
+
 if __name__ == '__main__':
      unittest.main()

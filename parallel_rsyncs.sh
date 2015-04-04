@@ -150,7 +150,7 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    command_to_be_run="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command"
+    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command -h --stats"
 }
 
 get_rsync_version() {
@@ -162,13 +162,17 @@ get_rsync_version() {
     rsync_version=$(${rsync_binary} --version | grep version | awk '{print $3}' | cut -d '.' -f 1)
 }
 
-
+run_parallel_arguments() {
+    ls ${source} | parallel echo "${rsync_with_options} ${source}/{} ${dest} --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log"
+}
 # MAIN
 check_source
 check_dest
 get_rsync_version
 construct_argument
+run_parallel_arguments
 
 echo "You are using rsync version $rsync_version"
-echo "Command to be run: ${command_to_be_run}"
+echo "Command to be run: ${rsync_with_options}"
+
 
