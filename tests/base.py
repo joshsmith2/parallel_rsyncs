@@ -21,14 +21,15 @@ class GeneralTest(unittest.TestCase):
                                  '-d', self.dest,
                                  '-l', self.logs,]
 
-
         shutil.copytree(os.path.join(self.files, 'data'), self.source)
         self.system_binary = '/opt/local/bin/rsync'
         self.v2_binary = '/usr/bin/rsync'
         if os.path.exists(self.logs):
             shutil.rmtree(self.logs)
         os.mkdir(self.logs)
-
+        if os.path.exists(self.dest):
+            shutil.rmtree(self.dest)
+        os.mkdir(self.dest)
 
     def tearDown(self):
         shutil.rmtree(self.source)

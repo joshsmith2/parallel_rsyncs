@@ -150,7 +150,7 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command -h --stats"
+    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --stats --log-file-format '%n Bytes: %b'"
 }
 
 get_rsync_version() {
@@ -163,7 +163,9 @@ get_rsync_version() {
 }
 
 run_parallel_arguments() {
-    ls ${source} | parallel ${rsync_with_options} ${source}/{} ${dest} --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log
+    #ls ${source} | parallel ${rsync_with_options} ${source}/{} ${dest} -j $parallel_rsyncs --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log
+
+    ls ${source} | parallel -v -j 20 ${rsync_with_options} ${source}/{} ${dest} $parallel_rsyncs --log-file ${log_path}/{}.log
 }
 # MAIN
 check_source

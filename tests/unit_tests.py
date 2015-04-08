@@ -99,5 +99,29 @@ class RsyncSyntaxTest(GeneralTest):
         output = str(sp.check_output(move_transfer))
         self.assertIn('--remove-source-files', output)
 
+class LogFileTest(GeneralTest):
+
+    def test_every_directory_gets_a_log_file(self):
+        sp.check_call(self.minimal_transfer)
+        for dest in os.listdir(self.dest):
+            log_path = os.path.join(self.logs, dest + ".log")
+            message = log_path + " does not exist."
+            self.assertTrue(os.path.exists(log_path), msg=message)
+
+    def test_every_successful_file_gets_logged(self):
+        sp.check_call(self.minimal_transfer)
+        for i in range(1,10):
+            file_path = os.path.join('root ' + str(i),
+                                     'child ' + str(i),
+                                     'content.txt')
+            file_in_logs = False
+            log_file = os.path.join(self.logs, "root " + str(i) + ".log")
+            with open (log_file, 'r') as f:
+                log_contents = f.readlines()
+            for line in log_contents:
+                if file_path in line:
+                    file_in_logs = True
+            self.assertTrue(file_in_logs, msg=file_path + " not logged")
+
 if __name__ == '__main__':
      unittest.main()
