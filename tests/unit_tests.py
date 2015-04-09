@@ -38,6 +38,35 @@ class FileTest(GeneralTest):
         singleton_in_dest = os.path.join(self.dest, 'singleton')
         self.assertTrue(os.path.exists(singleton_in_dest))
 
+    def test_existing_files_not_overwritten(self):
+        # Set up paths
+        root_dir = os.path.join(self.dest, 'root 1')
+        child_dir = os.path.join(root_dir, 'child 1')
+        existing_dir = os.path.join(root_dir, 'keep me')
+        existing_file = os.path.join(child_dir, 'keep_me.txt')
+        existing_and_coinciding_file = os.path.join(child_dir, 'content.txt')
+        existing_content = "Here is some original content which we don't want"
+
+        # Create existing objects
+        for directory in [root_dir, child_dir, existing_dir]:
+            os.mkdir(directory)
+        for file in [existing_and_coinciding_file, existing_file]:
+            with open(file, 'w') as f:
+                f.write(existing_content)
+
+        # Conduct a transfer and check all's still there
+        sp.check_call(self.minimal_transfer)
+
+        for object in [existing_dir,
+                       existing_and_coinciding_file,
+                       existing_file]:
+            message = object + " does not exist"
+            self.assertTrue(os.path.exists(object), msg=message)
+        with open(existing_and_coinciding_file, 'r') as f:
+            lines = [l.strip() for l in f.readlines()]
+            self.assertNotIn(existing_content, lines)
+            self.assertIn("CONTENT IS HERE", lines)
+
 class ArgumentTest(GeneralTest):
 
     def test_script_fails_with_nonexistent_source(self):
