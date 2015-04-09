@@ -163,18 +163,18 @@ get_rsync_version() {
 }
 
 run_parallel_arguments() {
-    #ls ${source} | parallel ${rsync_with_options} ${source}/{} ${dest} -j $parallel_rsyncs --log-file ${log_path}/{}_files.log 1>> ${log_path}/{}_log.log 2>> ${log_path}/{}_errors.log
-
-    ls ${source} | parallel -v -j 20 ${rsync_with_options} ${source}/{} ${dest} $parallel_rsyncs --log-file ${log_path}/{}.log
+    ls ${source} | parallel -v -u -j 20 ${rsync_with_options} ${source}/{} ${dest} $parallel_rsyncs --log-file ${log_path}/{}.log 1>> /dev/null 2> ${log_path}/rsync_errors.log
 }
 # MAIN
 check_source
 check_dest
 get_rsync_version
 construct_argument
-run_parallel_arguments
 
 echo "You are using rsync version $rsync_version"
 echo "Command to be run: ${rsync_with_options}"
+
+run_parallel_arguments
+
 
 

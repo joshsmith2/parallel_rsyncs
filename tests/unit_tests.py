@@ -29,6 +29,15 @@ class FileTest(GeneralTest):
             self.assertIn(message, str(e.output))
         self.assertFalse(os.path.exists(self.non_existent_dest))
 
+    def test_single_files_are_moved(self):
+        singleton_in_source = os.path.join(self.source, 'singleton')
+        with open(singleton_in_source, 'w') as f:
+            f.write("HERE IT IS THE CONTENT")
+        sp.check_call(self.minimal_transfer)
+
+        singleton_in_dest = os.path.join(self.dest, 'singleton')
+        self.assertTrue(os.path.exists(singleton_in_dest))
+
 class ArgumentTest(GeneralTest):
 
     def test_script_fails_with_nonexistent_source(self):
@@ -122,6 +131,11 @@ class LogFileTest(GeneralTest):
                 if file_path in line:
                     file_in_logs = True
             self.assertTrue(file_in_logs, msg=file_path + " not logged")
+
+    def test_errors_log_created(self):
+        sp.check_call(self.minimal_transfer)
+        error_file = os.path.join(self.logs, 'rsync_errors.log')
+        self.assertTrue(os.path.exists(error_file))
 
 if __name__ == '__main__':
      unittest.main()

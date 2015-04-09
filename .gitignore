@@ -1,4 +1,5 @@
 .idea/
 *.pyc
 *.pyo
-
+tests/files/dest/
+tests/files/logs/
