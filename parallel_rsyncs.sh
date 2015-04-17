@@ -50,6 +50,11 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
             ;;
         h)
 
+            # To be put back into here
+            #-m : move_mode : bool : default false
+            #    Delete files from source after copy. Off by default.
+
+
             echo """
             Sync files from source to dir using multiple instances of rsync.
 
@@ -68,7 +73,7 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
                 The source directory to copy.
 
             -d = dest : str - path
-                The destibnation directory
+                The destination directory
 
             -l = logs: str - path
                 A directory in which to create logs for this move
@@ -87,9 +92,6 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
 
             -v : bool : default false
                 Verbose - if true, print info to stdout as opposed to only errors.
-
-            -m : move_mode : bool : default false
-                Delete files from source after copy. Off by default.
 
             -x : copy_extended_attributes : bool : default false
                 Copy extended attributes.
@@ -150,7 +152,7 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --stats --log-file-format '%n Bytes: %b'"
+    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --no-links --stats --log-file-format '%n Bytes: %b'"
 }
 
 get_rsync_version() {

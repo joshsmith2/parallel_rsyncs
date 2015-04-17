@@ -30,17 +30,18 @@ class GeneralTest(unittest.TestCase):
         if os.path.exists(self.dest):
             shutil.rmtree(self.dest)
         os.mkdir(self.dest)
+        self.files_to_delete = []
 
     def tearDown(self):
         shutil.rmtree(self.source)
         if os.path.exists(self.non_existent_dest):
             shutil.rmtree(self.non_existent_dest)
-
+        for file in self.files_to_delete:
+            os.remove(file)
 
     def check_exists(self, path):
         self.assertTrue(os.path.exists(os.path.abspath(path)),
                         msg=path + " does not exist.")
-
 
 if __name__ == '__main__':
     unittest.main()

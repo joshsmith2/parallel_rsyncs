@@ -67,6 +67,44 @@ class FileTest(GeneralTest):
             self.assertNotIn(existing_content, lines)
             self.assertIn("CONTENT IS HERE", lines)
 
+    def test_symlinks_not_transferred(self):
+        symlink_source = os.path.join(self.files, 'symlink_destination')
+        self.files_to_delete.append(symlink_source)
+        with open(symlink_source, 'w') as f:
+            f.write("Content")
+        symlink = os.path.join(self.source, 'root 1', 'symlink')
+        os.symlink(symlink_source, symlink)
+
+        self.assertTrue(os.path.exists(symlink))
+        sp.check_call(self.minimal_transfer)
+        message = 'Symlink transferred. Bad bad not good.'
+        self.assertFalse(os.path.exists(os.path.join(self.dest, 'symlink')),
+                                        msg=message)
+        log_path = os.path.join(self.logs, 'root 1.log')
+        with open(log_path, 'r') as f:
+            log_contents = [l.strip() for l in f.readlines()]
+        desired_log = "skipping non-regular file \"root 1/symlink\""
+        in_logs = False
+        for c in log_contents:
+            if desired_log in c:
+                in_logs = True
+        self.assertTrue(in_logs, msg = 'Symlink skipping not logged')
+
+    def test_the_files_from_hard_links_are_transferred(self):
+        hard_link_source = os.path.join(self.files, 'hard_link_destination')
+        self.files_to_delete.append(hard_link_source)
+        with open(hard_link_source, 'w') as f:
+            f.write("Content")
+        hard_link = os.path.join(self.source, 'hard_link')
+        os.link(hard_link_source, hard_link)
+
+        self.assertTrue(os.path.exists(hard_link))
+        sp.check_call(self.minimal_transfer)
+        message = 'Hard link not transferred. Bad bad not good.'
+        self.assertTrue(os.path.exists(os.path.join(self.dest, 'hard_link')),
+                        msg=message)
+        self.assertFalse(os.path.islink(os.path.join(self.dest, 'hard_link')))
+
 class ArgumentTest(GeneralTest):
 
     def test_script_fails_with_nonexistent_source(self):
@@ -92,7 +130,6 @@ class ArgumentTest(GeneralTest):
         except sp.CalledProcessError as e:
             message = "Please specify a source with the '-s' flag."
             self.assertIn(message, str(e.output))
-
 
 class RsyncSyntaxTest(GeneralTest):
 
