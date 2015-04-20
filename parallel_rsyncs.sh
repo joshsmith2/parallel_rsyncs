@@ -20,15 +20,15 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
     case $opt in
         s)
             #source: str, path - the source directory to copy
-            source=$OPTARG
+            source="$OPTARG"
             ;;
         d)
             #dest: str, path - the destination directory
-            dest=$OPTARG
+            dest="$OPTARG"
             ;;
         l)
             #log_file: str, path - path to the log file for this copy.
-            log_path=$OPTARG
+            log_path="$OPTARG"
             ;;
         p)
             parallel_syncs=$OPTARG
@@ -165,7 +165,10 @@ get_rsync_version() {
 }
 
 run_parallel_arguments() {
-    ls ${source} | parallel -v -u -j 20 ${rsync_with_options} ${source}/{} ${dest} $parallel_rsyncs --log-file ${log_path}/{}.log 1>> /dev/null 2> ${log_path}/rsync_errors.log
+    echo Quotes: "$source"
+    echo Brackets: ${source}
+
+    ls "${source}" | parallel -v -u -j 20 ${rsync_with_options} "${source}"/"{}" "${dest}" $parallel_rsyncs --log-file ${log_path}/{}.log 1>> /dev/null 2> ${log_path}/rsync_errors.log
 }
 # MAIN
 check_source

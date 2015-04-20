@@ -38,6 +38,10 @@ class GeneralTest(unittest.TestCase):
             shutil.rmtree(self.non_existent_dest)
         for file in self.files_to_delete:
             os.remove(file)
+        try:
+            shutil.rmtree(self.spaced_source)
+        except (AttributeError, FileNotFoundError):
+            pass
 
     def check_exists(self, path):
         self.assertTrue(os.path.exists(os.path.abspath(path)),

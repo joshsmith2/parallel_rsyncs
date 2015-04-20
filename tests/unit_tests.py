@@ -131,6 +131,23 @@ class ArgumentTest(GeneralTest):
             message = "Please specify a source with the '-s' flag."
             self.assertIn(message, str(e.output))
 
+    def test_script_can_deal_with_spaces(self):
+        self.spaced_source = os.path.join(self.source,
+                                          r'spaces all up in here')
+        spaced_dest = (os.path.join(self.dest,
+                                    r'spaces all up in here'))
+        slashed_source = os.path.join(self.source,
+                                      r'spaces\ all\ up\ in\ here')
+        os.mkdir(self.spaced_source)
+        for i in range(10):
+            subdir = os.path.join(self.spaced_source, 'child %s' % i)
+            os.mkdir(subdir)
+        sp.check_call([self.parallel_rsyncs,
+                       '-s', slashed_source,
+                       '-d', self.dest,
+                       '-l', self.logs])
+        self.assertTrue(os.path.exists(spaced_dest))
+
 class RsyncSyntaxTest(GeneralTest):
 
     def test_correct_version_of_rsync_used(self):
