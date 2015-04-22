@@ -152,7 +152,13 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --no-links --stats --log-file-format '%n Bytes: %b'"
+    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --no-links --stats --log-file-format '%n Bytes: %b' --protect-args"
+}
+
+run_rsync_with_defined_source() {
+    source_path="${1}"
+    log_filename=$(basename "${source_path}")
+    "${rsync_with_options}" "${source_path}" "${dest}" $parallel_syncs --log_file "${log_path}/${log_filename}"
 }
 
 get_rsync_version() {
@@ -165,11 +171,16 @@ get_rsync_version() {
 }
 
 run_parallel_arguments() {
-    echo Quotes: "$source"
-    echo Brackets: ${source}
 
-    ls "${source}" | parallel -v -u -j 20 ${rsync_with_options} "${source}"/"{}" "${dest}" $parallel_rsyncs --log-file ${log_path}/{}.log 1>> /dev/null 2> ${log_path}/rsync_errors.log
+    #Read source directory contents into an array
+    source_arr=("${source}"/*)
+
+    export -f run_rsync_with_defined_source
+
+    # Pass array to parallel
+    parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${log_path}/rsync_errors.log ::: "${source_arr[@]}"
 }
+
 # MAIN
 check_source
 check_dest
