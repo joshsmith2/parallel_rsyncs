@@ -188,7 +188,6 @@ run_parallel_arguments() {
 
     # Pass array to parallel
     parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
-    #parallel -v -u -j 20 run_rsync_with_defined_source "{}" ::: "${source_arr[@]}"
 }
 
 # MAIN
