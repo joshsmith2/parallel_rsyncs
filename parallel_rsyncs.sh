@@ -14,7 +14,7 @@
 
 
 
-#Initialise command line arguments
+# Initialise command line arguments
 # Defaults for switches:
 while getopts "hs:d:l:p:b:cvmx" opt; do
     case $opt in
@@ -24,14 +24,14 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
             ;;
         d)
             #dest: str, path - the destination directory
-            dest="$OPTARG"
+            DEST="$OPTARG"
             ;;
         l)
             #log_file: str, path - path to the log file for this copy.
-            log_path="$OPTARG"
+            LOG_PATH="$OPTARG"
             ;;
         p)
-            parallel_syncs=$OPTARG
+            PARALLEL_SYNCS=$OPTARG
             ;;
         b)
             alternative_rsync_binary=$OPTARG
@@ -118,12 +118,12 @@ set_up_default_arguments() {
 
 # Check that the destination directory exists - create it if not
 check_dest() {
-    if [[ ! -e ${dest} ]]; then
+    if [[ ! -e ${DEST} ]]; then
         if [[ $create_dest ]]; then
             echo "Destination does not exist. Creating ${dest}"
-            mkdir -vp -m 777 ${dest}
+            mkdir -vp -m 777 ${DEST}
         else
-            echo "Destination ${dest} does not exist. Run with -c flag if you'd like to create it."
+            echo "Destination ${DEST} does not exist. Run with -c flag if you'd like to create it."
             exit 1
         fi
     fi
@@ -143,7 +143,7 @@ check_source() {
 
 construct_argument() {
     if [[ $move_mode ]]; then
-        copy_or_move_command="--remove-source-files "
+        copy_or_move_command=" --remove-source-files "
     fi
     if [[ ${copy_extended_attributes} ]]; then
         if [[ "$rsync_version" -eq "2" ]]; then
@@ -152,22 +152,25 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    rsync_with_options="${rsync_binary} -WrltD${extended_attribute_flag} $copy_or_move_command --no-links --stats --log-file-format '%n Bytes: %b' --protect-args"
+    #RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --safe-links --stats"
+    RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --stats"
 }
 
 run_rsync_with_defined_source() {
     source_path="${1}"
     log_filename=$(basename "${source_path}")
-    "${rsync_with_options}" "${source_path}" "${dest}" $parallel_syncs --log_file "${log_path}/${log_filename}"
+    echo "-----------------------"
+    echo "Trying to: ${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}"/"${log_filename}"
+    "${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}/${log_filename}"
 }
 
 get_rsync_version() {
     if [[ ${alternative_rsync_binary} ]]; then
-        rsync_binary=${alternative_rsync_binary}
+        RSYNC_BINARY=${alternative_rsync_binary}
     else
-        rsync_binary=$(which rsync)
+        RSYNC_BINARY=$(which rsync)
     fi
-    rsync_version=$(${rsync_binary} --version | grep version | awk '{print $3}' | cut -d '.' -f 1)
+    rsync_version=$(${RSYNC_BINARY} --version | grep version | awk '{print $3}' | cut -d '.' -f 1)
 }
 
 run_parallel_arguments() {
@@ -175,10 +178,17 @@ run_parallel_arguments() {
     #Read source directory contents into an array
     source_arr=("${source}"/*)
 
+    # Export functions needed by defined_source, since parallel runs in a different shell
     export -f run_rsync_with_defined_source
+    export RSYNC_BINARY
+    export RSYNC_OPTIONS
+    export DEST
+    export LOG_PATH
+    export PARALLEL_SYNCS
 
     # Pass array to parallel
-    parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${log_path}/rsync_errors.log ::: "${source_arr[@]}"
+    #parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+     parallel -v -u -j 20 run_rsync_with_defined_source "{}" ::: "${source_arr[@]}"
 }
 
 # MAIN
@@ -187,8 +197,8 @@ check_dest
 get_rsync_version
 construct_argument
 
-echo "You are using rsync version $rsync_version"
-echo "Command to be run: ${rsync_with_options}"
+#echo "You are using rsync version $rsync_version"
+#echo "Command to be run: ${rsync_with_options}"
 
 run_parallel_arguments
 
