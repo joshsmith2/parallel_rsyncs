@@ -120,7 +120,7 @@ set_up_default_arguments() {
 check_dest() {
     if [[ ! -e ${DEST} ]]; then
         if [[ $create_dest ]]; then
-            echo "Destination does not exist. Creating ${dest}"
+            echo "Destination does not exist. Creating ${DEST}"
             mkdir -vp -m 777 ${DEST}
         else
             echo "Destination ${DEST} does not exist. Run with -c flag if you'd like to create it."
@@ -153,7 +153,7 @@ construct_argument() {
         fi
     fi
     #RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --safe-links --stats"
-    RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --stats"
+    RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --stats --no-links"
 }
 
 run_rsync_with_defined_source() {
@@ -161,7 +161,7 @@ run_rsync_with_defined_source() {
     log_filename=$(basename "${source_path}")
     echo "-----------------------"
     echo "Trying to: ${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}"/"${log_filename}"
-    "${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}/${log_filename}"
+    "${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}/${log_filename}.log"
 }
 
 get_rsync_version() {
@@ -187,8 +187,8 @@ run_parallel_arguments() {
     export PARALLEL_SYNCS
 
     # Pass array to parallel
-    #parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
-     parallel -v -u -j 20 run_rsync_with_defined_source "{}" ::: "${source_arr[@]}"
+    parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+    #parallel -v -u -j 20 run_rsync_with_defined_source "{}" ::: "${source_arr[@]}"
 }
 
 # MAIN
@@ -197,8 +197,8 @@ check_dest
 get_rsync_version
 construct_argument
 
-#echo "You are using rsync version $rsync_version"
-#echo "Command to be run: ${rsync_with_options}"
+echo "You are using rsync version $rsync_version"
+echo "Command to be run: ${RSYNC_BINARY} ${RSYNC_OPTIONS}"
 
 run_parallel_arguments
 
