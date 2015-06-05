@@ -159,8 +159,6 @@ construct_argument() {
 run_rsync_with_defined_source() {
     source_path="${1}"
     log_filename=$(basename "${source_path}")
-    echo "-----------------------"
-    echo "Trying to: ${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}"/"${log_filename}"
     "${RSYNC_BINARY}" ${RSYNC_OPTIONS} "${source_path}" "${DEST}" --log-file "${LOG_PATH}/${log_filename}.log"
 }
 
