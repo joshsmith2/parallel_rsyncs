@@ -189,6 +189,11 @@ class RsyncSyntaxTest(GeneralTest):
         output = str(sp.check_output(move_transfer))
         self.assertIn('--remove-source-files', output)
 
+    def test_changing_no_of_rsyncs_does_not_shit_everything_up(self):
+        transfer = self.minimal_transfer
+        transfer.extend(['-p', '1'])
+        output = str(sp.check_output(transfer))
+
 class LogFileTest(GeneralTest):
 
     def test_every_directory_gets_a_log_file(self):

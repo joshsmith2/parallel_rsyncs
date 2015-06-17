@@ -185,10 +185,11 @@ run_parallel_arguments() {
     export PARALLEL_SYNCS
 
     # Pass array to parallel
-    parallel -v -u -j 20 run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+    parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
 }
 
 # MAIN
+set_up_default_arguments
 check_source
 check_dest
 get_rsync_version
