@@ -16,7 +16,7 @@
 
 # Initialise command line arguments
 # Defaults for switches:
-while getopts "hs:d:l:p:b:cvmx" opt; do
+while getopts "hs:d:l:p:b:f:cvmx" opt; do
     case $opt in
         s)
             #source: str, path - the source directory to copy
@@ -35,6 +35,9 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
             ;;
         b)
             alternative_rsync_binary=$OPTARG
+            ;;
+        f)
+            PATHS_FILE=$OPTARG
             ;;
         c)
             create_dest=true
@@ -75,12 +78,16 @@ while getopts "hs:d:l:p:b:cvmx" opt; do
             -d = dest : str - path
                 The destination directory
 
-            -l = logs: str - path
+            -l = logs : str - path
                 A directory in which to create logs for this move
 
             -p = parallel_rsyncs : int
                 The number of rsync instances to run in parallel when moving these files.
                 Default: 20
+
+            -f = paths_file : str - path
+                A file containing paths within source to be moved. If this
+                option is set, only paths contained in this file will be moved.
 
             -b = alternative_rsync_binary : str - path
                 Full path to an alternative rsync binary to use for the
@@ -152,7 +159,6 @@ construct_argument() {
             extended_attribute_flag="X"
         fi
     fi
-    #RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --safe-links --stats"
     RSYNC_OPTIONS="-WrltD${extended_attribute_flag}$copy_or_move_command --stats --no-links"
 }
 
@@ -173,6 +179,7 @@ get_rsync_version() {
 
 run_parallel_arguments() {
 
+
     #Read source directory contents into an array
     source_arr=("${source}"/*)
 
@@ -184,8 +191,17 @@ run_parallel_arguments() {
     export LOG_PATH
     export PARALLEL_SYNCS
 
-    # Pass array to parallel
-    parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+    if [[ ! $PATHS_FILE ]]; then
+        # Pass array to parallel
+        parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+    else
+        current_ifs=$IFS
+        IFS=$"\n"
+        #THINGS THIS MUST DO:
+        # - Deal with spaces in file
+        # - Check file exists
+
+    fi
 }
 
 # MAIN

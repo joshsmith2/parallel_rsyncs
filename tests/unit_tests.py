@@ -223,5 +223,16 @@ class LogFileTest(GeneralTest):
         error_file = os.path.join(self.logs, 'rsync_errors.log')
         self.assertTrue(os.path.exists(error_file))
 
+class PathsFileTest(GeneralTest):
+
+    def test_script_exits_if_path_file_non_existent(self):
+        non_file = "/crod/buggr/lol/crunge"
+        self.check_exists(non_file, positive=False)
+        self.minimal_transfer.extend(["-f", non_file])
+        output = str(sp.check_output(self.minimal_transfer))
+        self.assertIn("/crod/buggr/lol/crunge does not exist.", output)
+        self.dest_example = os.path.join(self.dest, 'root 1')
+        self.check_exists(self.dest_example, positive=False)
+
 if __name__ == '__main__':
      unittest.main()
