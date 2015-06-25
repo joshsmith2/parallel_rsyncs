@@ -2,7 +2,6 @@ from base import *
 
 class FunctionalTest(GeneralTest):
 
-
     def test_can_get_help(self):
         output = sp.check_output([self.parallel_rsyncs, "-h"])
         self.assertNotEqual(output, b'')
@@ -25,6 +24,19 @@ class FunctionalTest(GeneralTest):
             with open(dest_content, 'r') as content:
                 lines = [l.strip() for l in content.readlines()]
             self.assertIn('CONTENT IS HERE', lines)
+
+    def test_you_can_read_paths_from_a_file_and_move_them_ok(self):
+        sp.check_call([self.parallel_rsyncs,
+                       '-s', self.source,
+                       '-d', self.dest,
+                       '-l', self.logs,
+                       '-f', self.paths_file])
+        for i in range(10):
+            dest = os.path.join(self.dest, 'root ' + str(i))
+            if i in [1, 3, 8]:
+                self.check_exists(dest)
+            else:
+                self.check_exists(dest, positive=False)
 
 
 if __name__ == '__main__':

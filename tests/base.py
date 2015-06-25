@@ -11,6 +11,7 @@ class GeneralTest(unittest.TestCase):
         self.source = os.path.join(self.files, 'source')
         self.dest = os.path.join(self.files, 'dest')
         self.logs = os.path.join(self.files, 'logs')
+        self.paths_file = os.path.join(self.files, 'paths.txt')
         self.non_existent_dest = os.path.join(self.current_dir, 'new_dest')
         parallel_rsyncs_messy = os.path.join(self.current_dir,
                                              "../parallel_rsyncs.sh")
@@ -43,9 +44,13 @@ class GeneralTest(unittest.TestCase):
         except (AttributeError, FileNotFoundError):
             pass
 
-    def check_exists(self, path):
-        self.assertTrue(os.path.exists(os.path.abspath(path)),
-                        msg=path + " does not exist.")
+    def check_exists(self, path, positive=True):
+        if positive:
+            self.assertTrue(os.path.exists(os.path.abspath(path)),
+                            msg=path + " does not exist.")
+        else:
+            self.assertFalse(os.path.exists(os.path.abspath(path)),
+                             msg=path + " exists.")
 
 if __name__ == '__main__':
     unittest.main()
