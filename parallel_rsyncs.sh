@@ -189,6 +189,7 @@ run_parallel_arguments() {
     export PARALLEL_SYNCS
 
     if [[ ! $PATHS_FILE ]]; then
+        check_source
         #Read source directory contents into an array
         source_arr=("${source}"/*)
         # Pass array to parallel
@@ -211,7 +212,6 @@ run_parallel_arguments() {
 
 # MAIN
 set_up_default_arguments
-check_source
 check_dest
 get_rsync_version
 construct_argument

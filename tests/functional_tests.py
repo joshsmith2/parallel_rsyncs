@@ -37,7 +37,6 @@ class FunctionalTest(GeneralTest):
     def test_you_can_read_paths_from_a_file_and_move_them_ok(self):
         self.make_full_paths_file()
         sp.check_call([self.parallel_rsyncs,
-                       '-s', self.source,
                        '-d', self.dest,
                        '-l', self.logs,
                        '-f', self.full_paths_file])
