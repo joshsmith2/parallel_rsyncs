@@ -197,6 +197,12 @@ run_parallel_arguments() {
     else
         current_ifs=$IFS
         IFS=$"\n"
+        # Check that the paths file exists
+        if [[ -f  $PATHS_FILE ]]; then
+            echo "Code goes here"
+        else
+            echo "$PATHS_FILE does not exist. Nothing has been moved"
+        fi
         #THINGS THIS MUST DO:
         # - Deal with spaces in file
         # - Check file exists
