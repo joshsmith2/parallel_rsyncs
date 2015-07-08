@@ -11,7 +11,8 @@ class GeneralTest(unittest.TestCase):
         self.source = os.path.join(self.files, 'source')
         self.dest = os.path.join(self.files, 'dest')
         self.logs = os.path.join(self.files, 'logs')
-        self.paths_file = os.path.join(self.files, 'paths.txt')
+        self.paths_file = os.path.join(self.files, 'data', 'paths.txt')
+        self.full_paths_file = os.path.join(self.files, 'data', 'full_paths.txt')
         self.non_existent_dest = os.path.join(self.current_dir, 'new_dest')
         parallel_rsyncs_messy = os.path.join(self.current_dir,
                                              "../parallel_rsyncs.sh")

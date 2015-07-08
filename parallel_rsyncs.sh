@@ -73,7 +73,7 @@ while getopts "hs:d:l:p:b:f:cvmx" opt; do
 
 
             -s = source : str - path
-                The source directory to copy.
+                The source directory to copy. Ignored if -f is set
 
             -d = dest : str - path
                 The destination directory
@@ -85,9 +85,10 @@ while getopts "hs:d:l:p:b:f:cvmx" opt; do
                 The number of rsync instances to run in parallel when moving these files.
                 Default: 20
 
-            -f = paths_file : str - path
-                A file containing paths within source to be moved. If this
-                option is set, only paths contained in this file will be moved.
+            -f = paths_file : str - path : default none
+                A file containing full paths to be moved. If this
+                option is set, only paths contained in this file will be moved,
+                and the -s option is ignored.
 
             -b = alternative_rsync_binary : str - path
                 Full path to an alternative rsync binary to use for the
@@ -179,10 +180,6 @@ get_rsync_version() {
 
 run_parallel_arguments() {
 
-
-    #Read source directory contents into an array
-    source_arr=("${source}"/*)
-
     # Export functions needed by defined_source, since parallel runs in a different shell
     export -f run_rsync_with_defined_source
     export RSYNC_BINARY
@@ -192,21 +189,23 @@ run_parallel_arguments() {
     export PARALLEL_SYNCS
 
     if [[ ! $PATHS_FILE ]]; then
+        #Read source directory contents into an array
+        source_arr=("${source}"/*)
         # Pass array to parallel
-        parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2> ${LOG_PATH}/rsync_errors.log ::: "${source_arr[@]}"
+        parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2>> "${LOG_PATH}/rsync_errors.log" ::: "${source_arr[@]}"
     else
         current_ifs=$IFS
-        IFS=$"\n"
+        IFS=$'\n'
         # Check that the paths file exists
         if [[ -f  $PATHS_FILE ]]; then
-            echo "Code goes here"
+            # Read paths into an array, ignoring empty lines
+            PATHS=($(sed '/^$/d' "$PATHS_FILE"))
+            parallel -v -u -j $parallel_rsyncs run_rsync_with_defined_source "{}" 1>> /dev/null 2>> "${LOG_PATH}/rsync_errors.log" ::: "${PATHS[@]}"
+            parallel echo "{}" ::: "${PATHS[@]}"
         else
             echo "$PATHS_FILE does not exist. Nothing has been moved"
         fi
-        #THINGS THIS MUST DO:
-        # - Deal with spaces in file
-        # - Check file exists
-
+        IFS=$current_ifs
     fi
 }
 

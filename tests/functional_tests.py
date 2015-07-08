@@ -2,6 +2,15 @@ from base import *
 
 class FunctionalTest(GeneralTest):
 
+    def make_full_paths_file(self):
+        with open(self.full_paths_file, 'w') as fpf:
+            with open(self.paths_file, 'r') as pf:
+                for line in pf.readlines():
+                    full_path = os.path.join(self.source, line)
+                    fpf.write(full_path)
+            fpf.write('\n')
+
+
     def test_can_get_help(self):
         output = sp.check_output([self.parallel_rsyncs, "-h"])
         self.assertNotEqual(output, b'')
@@ -26,17 +35,21 @@ class FunctionalTest(GeneralTest):
             self.assertIn('CONTENT IS HERE', lines)
 
     def test_you_can_read_paths_from_a_file_and_move_them_ok(self):
+        self.make_full_paths_file()
         sp.check_call([self.parallel_rsyncs,
                        '-s', self.source,
                        '-d', self.dest,
                        '-l', self.logs,
-                       '-f', self.paths_file])
+                       '-f', self.full_paths_file])
         for i in range(10):
-            dest = os.path.join(self.dest, 'root ' + str(i))
-            if i in [1, 3, 8]:
-                self.check_exists(dest)
+            root = os.path.join(self.dest, 'root ' + str(i))
+            child = os.path.join(self.dest, 'child ' + str(i))
+            if i in [1, 8]:
+                self.check_exists(root)
+            elif i == 3:
+                self.check_exists(child)
             else:
-                self.check_exists(dest, positive=False)
+                self.check_exists(root, positive=False)
 
 
 if __name__ == '__main__':
